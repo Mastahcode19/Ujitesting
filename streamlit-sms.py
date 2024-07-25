@@ -239,5 +239,5 @@ elif page == "Tentang Saya":
         """,
         unsafe_allow_html=True
     )
-    st.image("Assets/profile.png", caption="Kevin", use_column_width=True)
+    st.image("Assets/profile2.png", caption="Kevin", use_column_width=True)
     st.write("<br><br>", unsafe_allow_html=True)
