@@ -192,18 +192,18 @@ if not results_df.empty:
     gb.configure_selection('single')
     grid_options = gb.build()
     grid_response = AgGrid(
-    results_df,
-    gridOptions=grid_options,
-    data_return_mode='FILTERED',
-    update_mode=GridUpdateMode.MODEL_CHANGED,
-    fit_columns_on_grid_load=True,
-    enable_enterprise_modules=True,
-    height=400,
-    reload_data=True
+        results_df,
+        gridOptions=grid_options,
+        data_return_mode='FILTERED',
+        update_mode=GridUpdateMode.MODEL_CHANGED,
+        fit_columns_on_grid_load=True,
+        enable_enterprise_modules=True,
+        height=400,
+        reload_data=True
     )
     
-    else:
-        st.write("Belum ada hasil deteksi yang tersimpan.")
+else:
+    st.write("Belum ada hasil deteksi yang tersimpan.")
 
 # Halaman Panduan Aplikasi
 elif page == "Panduan Aplikasi":
