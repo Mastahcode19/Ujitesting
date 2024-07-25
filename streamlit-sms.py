@@ -183,14 +183,14 @@ elif page == "Aplikasi Deteksi SMS":
 elif page == "List Hasil Deteksi":
     st.title('List Hasil Deteksi SMS Spam')
 
-        results_df = load_detection_results_from_firestore()
-        if not results_df.empty:
-            gb = GridOptionsBuilder.from_dataframe(results_df)
-            gb.configure_pagination()
-            gb.configure_side_bar()
-            gb.configure_selection('single')
-            grid_options = gb.build()
-            grid_response = AgGrid(
+    results_df = load_detection_results_from_firestore()
+    if not results_df.empty:
+        gb = GridOptionsBuilder.from_dataframe(results_df)
+        gb.configure_pagination()
+        gb.configure_side_bar()
+        gb.configure_selection('single')
+        grid_options = gb.build()
+        grid_response = AgGrid(
             results_df,
             gridOptions=grid_options,
             data_return_mode='FILTERED',
@@ -239,5 +239,5 @@ elif page == "Tentang Saya":
         """,
         unsafe_allow_html=True
     )
-    st.image("Assets/profile2.png", caption="Kevin", use_column_width=True)
+    st.image("Assets/profile.png", caption="Kevin", use_column_width=True)
     st.write("<br><br>", unsafe_allow_html=True)
