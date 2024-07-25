@@ -184,6 +184,7 @@ elif page == "List Hasil Deteksi":
     st.title('List Hasil Deteksi SMS Spam')
 
     results_df = load_detection_results_from_firestore()
+    
     if not results_df.empty:
         gb = GridOptionsBuilder.from_dataframe(results_df)
         gb.configure_pagination()
@@ -200,6 +201,7 @@ elif page == "List Hasil Deteksi":
             height=400,
             reload_data=True
         )
+        
     else:
         st.write("Belum ada hasil deteksi yang tersimpan.")
 
