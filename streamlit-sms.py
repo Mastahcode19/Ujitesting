@@ -22,7 +22,7 @@ def save_detection_to_firestore(sms_text, label):
         'Keterangan': label
     })
 
-# Fungsi untuk mengambil    i Firestore
+# Fungsi untuk mengambil data dari Firestore
 def load_detection_results_from_firestore():
     docs = db.collection('sms_detections').stream()
     data = []
@@ -32,14 +32,20 @@ def load_detection_results_from_firestore():
 
 # Load saved model
 model_spam = pickle.load(open('Model/model_spam.sav', 'rb'))
-loaded_vec = TfidfVectorizer(decode_error="replace", vocabulary=set(pickle.load(open("Model/new_selected_feature_tf-idf.sav", "rb"))))
+vocabulary = pickle.load(open("Model/new_selected_feature_tf-idf.sav", "rb"))
+
+# Pastikan vocabulary adalah dictionary
+if not isinstance(vocabulary, dict):
+    raise ValueError("Vocabulary should be a dictionary.")
+
+loaded_vec = TfidfVectorizer(decode_error="replace", vocabulary=vocabulary)
 
 # Sidebar dengan option menu
 with st.sidebar:
     page = option_menu(
         "Menu Navigasi",
-        ["Informasi SMS Spam","Panduan Aplikasi", "Aplikasi Deteksi SMS", "List Hasil Deteksi","Tentang Saya"],
-        icons=["info-circle","book","search", "table","person"],
+        ["Informasi SMS Spam", "Panduan Aplikasi", "Aplikasi Deteksi SMS", "List Hasil Deteksi", "Tentang Saya"],
+        icons=["info-circle", "book", "search", "table", "person"],
         menu_icon="cast",
         default_index=0,
         styles={
@@ -63,7 +69,7 @@ if page == "Informasi SMS Spam":
     st.markdown(
         """
         <div style="text-align: justify;">
-            Kalian pernah bertanya-tanya sebenernya SMS spam itu apasih?apakah berbahaya?.Weets,tenang dulu ya gess karena disini saya akan membahas lebih lanjut tentang topik ini,let's gooo.
+            Kalian pernah bertanya-tanya sebenernya SMS spam itu apasih? Apakah berbahaya?. Weets, tenang dulu ya gess karena disini saya akan membahas lebih lanjut tentang topik ini, let's gooo.
             Secara umum SMS spam ialah sebuah pesan teks yang tidak diinginkan yang dikirim secara massal kepada banyak penerima.
             Pesan ini sering kali berisi penawaran promosi, penipuan, atau informasi yang tidak relevan. SMS spam dapat mengganggu dan menghabiskan sumber daya pada perangkat penerima.
             Maka dari itu dengan teknologi deteksi SMS spam, kita dapat memfilter dan mengelompokkan pesan-pesan ini untuk mengurangi dampak negatifnya.
@@ -75,7 +81,7 @@ if page == "Informasi SMS Spam":
     st.image("Assets/spamsms.png", caption="Gambar SMS spam", use_column_width=True)
     st.write("<br><br>", unsafe_allow_html=True)
 
-# Halaman Aplikasi Deteksi
+# Halaman Aplikasi Deteksi SMS
 elif page == "Aplikasi Deteksi SMS":
     st.title('Sistem Deteksi SMS Spam')
     spam_detection = ''
@@ -100,7 +106,7 @@ elif page == "Aplikasi Deteksi SMS":
             spam_detection = "Mohon Masukkan Pesan Teks SMS"
             st.markdown(
             f"""
-            <div style="border: 2px ; border-radius: 15px; padding: 2px; display: flex; align-items: center;background-color: #1F211D ;" >
+            <div style="border: 2px solid #F1C40F; border-radius: 15px; padding: 2px; display: flex; align-items: center; background-color: #1F211D;">
             <div style="color: #F1C40F; font-size: 25px; margin-left: 10px;"><strong>{spam_detection}</strong></div>
             <iframe src="https://lottie.host/embed/c006c08e-3a86-47e6-aaae-3e11674c204b/cQiwVs5lkD.json" style="width: 100px; height: 100px;"></iframe>
             </div>
@@ -108,7 +114,9 @@ elif page == "Aplikasi Deteksi SMS":
             unsafe_allow_html=True
             )
         else:
-            predict_spam = model_spam.predict(loaded_vec.fit_transform([clean_teks]))
+            # Transform text using the loaded vectorizer
+            transformed_text = loaded_vec.transform([clean_teks])
+            predict_spam = model_spam.predict(transformed_text)
 
             if predict_spam == 0:
                 spam_detection = "SMS NORMAL"
@@ -122,7 +130,7 @@ elif page == "Aplikasi Deteksi SMS":
                         <div style="background-color: white; border-radius: 5px; padding: 5px; margin-top: 10px;">
                             <ul style="color: #177233; font-size: 18px; list-style-type: none; padding: 0; margin: 0;">
                                 <li>Pesan SMS ini bukan termasuk pesan spam promo/penipuan</li>
-                                <li>melainkan pesan normal pada umumnya dan aman untuk ditanggapi</li>
+                                <li>Melainkan pesan normal pada umumnya dan aman untuk ditanggapi</li>
                             </ul>
                         </div>
                     </div>
@@ -145,7 +153,7 @@ elif page == "Aplikasi Deteksi SMS":
                         <div style="background-color: white; border-radius: 5px; padding: 5px; margin-top: 10px;">
                             <ul style="color: #F00B00; font-size: 18px; list-style-type: none; padding: 0; margin: 0;">
                                 <li>Pesan SMS ini terindikasi pesan spam penipuan</li>
-                                <li>dikarenakan terdapat informasi yang mencurigakan</li>
+                                <li>Dikarenakan terdapat informasi yang mencurigakan</li>
                             </ul>
                         </div>
                     </div>
@@ -168,7 +176,7 @@ elif page == "Aplikasi Deteksi SMS":
                         <div style="background-color: white; border-radius: 5px; padding: 5px; margin-top: 10px;">
                             <ul style="color: #3773D6; font-size: 18px; list-style-type: none; padding: 0; margin: 0;">
                                 <li>Pesan SMS ini merupakan pesan spam promo</li>
-                                <li>dikarenakan terdapat unsur promosi</li>
+                                <li>Dikarenakan terdapat unsur promosi</li>
                             </ul>
                         </div>
                     </div>
@@ -239,5 +247,5 @@ elif page == "Tentang Saya":
         """,
         unsafe_allow_html=True
     )
-    st.image("Assets/profile.png", caption="Kevin", use_column_width=True)
+    st.image("Assets/profile2.png", caption="Kevin", use_column_width=True)
     st.write("<br><br>", unsafe_allow_html=True)
