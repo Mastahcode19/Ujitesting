@@ -9,7 +9,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode
 
 # Cek apakah Firebase sudah diinisialisasi
 if not firebase_admin._apps:
-    cred = credentials.Certificate('path/to/your/firebase/credentials.json')
+    cred = credentials.Certificate('generatekey.json')
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
