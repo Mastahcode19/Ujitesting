@@ -201,6 +201,7 @@ if not results_df.empty:
     height=400,
     reload_data=True
     )
+    
     else:
         st.write("Belum ada hasil deteksi yang tersimpan.")
 
