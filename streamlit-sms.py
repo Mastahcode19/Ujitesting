@@ -185,23 +185,22 @@ elif page == "List Hasil Deteksi":
 
     results_df = load_detection_results_from_firestore()
     
-    if not results_df.empty:
-        gb = GridOptionsBuilder.from_dataframe(results_df)
-        gb.configure_pagination()
-        gb.configure_side_bar()
-        gb.configure_selection('single')
-        grid_options = gb.build()
-        grid_response = AgGrid(
-            results_df,
-            gridOptions=grid_options,
-            data_return_mode='FILTERED',
-            update_mode=GridUpdateMode.MODEL_CHANGED,
-            fit_columns_on_grid_load=True,
-            enable_enterprise_modules=True,
-            height=400,
-            reload_data=True
-        )
-        
+if not results_df.empty:
+    gb = GridOptionsBuilder.from_dataframe(results_df)
+    gb.configure_pagination()
+    gb.configure_side_bar()
+    gb.configure_selection('single')
+    grid_options = gb.build()
+    grid_response = AgGrid(
+    results_df,
+    gridOptions=grid_options,
+    data_return_mode='FILTERED',
+    update_mode=GridUpdateMode.MODEL_CHANGED,
+    fit_columns_on_grid_load=True,
+    enable_enterprise_modules=True,
+    height=400,
+    reload_data=True
+    )
     else:
         st.write("Belum ada hasil deteksi yang tersimpan.")
 
