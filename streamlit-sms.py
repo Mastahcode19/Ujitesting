@@ -201,8 +201,8 @@ if not results_df.empty:
         height=400,
         reload_data=True
     )
-    else:
-        st.write("Belum ada hasil deteksi yang tersimpan.")
+        else:
+            st.write("Belum ada hasil deteksi yang tersimpan.")
 
 # Halaman Panduan Aplikasi
 elif page == "Panduan Aplikasi":
