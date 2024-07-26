@@ -66,7 +66,7 @@ elif page == "Panduan Aplikasi":
 
 # Halaman Aplikasi Deteksi
 elif page == "Aplikasi Deteksi SMS":
-    st.title('Sistem Deteksi SMS Spam')
+    st.title('Sistem Deteksi SMS Spamliiii')
     spam_detection = ''
 
     st.markdown(
