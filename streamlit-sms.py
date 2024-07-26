@@ -7,7 +7,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode
 from pymongo import MongoClient
 
 # Inisialisasi MongoDB Atlas
-uri = st.secrets["KEYMONGO"]  # Ganti dengan URI MongoDB Atlas Anda
+uri = st.secrets["KEYMONG"]  # Ganti dengan URI MongoDB Atlas Anda
 client = MongoClient(uri)
 db = client["DatabaseSMS"]
 
