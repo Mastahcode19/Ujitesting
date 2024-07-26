@@ -4,30 +4,28 @@ import pandas as pd
 from streamlit_option_menu import option_menu
 from sklearn.feature_extraction.text import TfidfVectorizer
 from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode
-import firebase_admin
-from firebase_admin import credentials, firestore
+from pymongo import MongoClient
 
-# Inisialisasi Firebase hanya jika belum diinisialisasi
-if not firebase_admin._apps:
-    cred = credentials.Certificate("keygen.json")
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
+# Inisialisasi MongoDB Atlas
+uri = st.secrets["KEYMONGO"]  # Ganti dengan URI MongoDB Atlas Anda
+client = MongoClient(uri)
+db = client["DatabaseSMS"]
 
 # Load saved model
 model_spam = pickle.load(open('Model/model_spam.sav', 'rb'))
 loaded_vec = TfidfVectorizer(decode_error="replace", vocabulary=set(pickle.load(open("Model/new_selected_feature_tf-idf.sav", "rb"))))
 
-# Function to load detection results from Firebase
+# Function to load detection results from MongoDB
 def load_detection_results(collection_name):
-    results = db.collection(collection_name).stream()
+    collection = db[collection_name]
+    results = collection.find()
     data = [{'SMS': result.get('SMS'), 'Keterangan': result.get('Keterangan')} for result in results]
     return pd.DataFrame(data)
 
-# Function to save detection results to Firebase
+# Function to save detection results to MongoDB
 def save_detection_results(df, collection_name):
-    for index, row in df.iterrows():
-        db.collection(collection_name).add(row.to_dict())
+    collection = db[collection_name]
+    collection.insert_many(df.to_dict("records"))
 
 # Load detection results
 detection_results_promo = load_detection_results("hasil_deteksi_promo")
