@@ -9,7 +9,7 @@ from firebase_admin import credentials, firestore
 
 # Inisialisasi Firebase hanya jika belum diinisialisasi
 if not firebase_admin._apps:
-    cred = credentials.Certificate("genkey.json")
+    cred = credentials.Certificate("keygen.json")
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
