@@ -7,7 +7,7 @@ from st_aggrid import GridOptionsBuilder, AgGrid, GridUpdateMode
 from pymongo import MongoClient
 
 # Inisialisasi MongoDB Atlas
-uri = st.secrets["KEYMONG"]  # Ganti dengan URI MongoDB Atlas Anda
+uri = st.secrets["KEYMONGO"]  # Ganti dengan URI MongoDB Atlas Anda
 client = MongoClient(uri)
 db = client["DatabaseSMS"]
 
@@ -23,9 +23,10 @@ def load_detection_results(collection_name):
     return pd.DataFrame(data)
 
 # Function to save detection results to MongoDB
-def save_detection_results(df, collection_name):
+def save_detection_results(sms_text, prediction, collection_name):
     collection = db[collection_name]
-    collection.insert_many(df.to_dict("records"))
+    result = {'SMS': sms_text, 'Keterangan': prediction}
+    collection.insert_one(result)
 
 # Load detection results
 detection_results_promo = load_detection_results("hasil_deteksi_promo")
@@ -118,8 +119,7 @@ elif page == "Aplikasi Deteksi SMS":
                     """,
                     unsafe_allow_html=True
                 )
-                detection_results_normal = pd.concat([detection_results_normal, pd.DataFrame({'SMS': [clean_teks], 'Keterangan': [spam_detection]})], ignore_index=True)
-                save_detection_results(detection_results_normal, "hasil_deteksi_normal")
+                save_detection_results(clean_teks, spam_detection, "hasil_deteksi_normal")
 
             elif predict_spam == 1:
                 spam_detection = "SMS PENIPUAN"
@@ -142,8 +142,7 @@ elif page == "Aplikasi Deteksi SMS":
                     """,
                     unsafe_allow_html=True
                 )
-                detection_results_penipuan = pd.concat([detection_results_penipuan, pd.DataFrame({'SMS': [clean_teks], 'Keterangan': [spam_detection]})], ignore_index=True)
-                save_detection_results(detection_results_penipuan, "hasil_deteksi_penipuan")
+                save_detection_results(clean_teks, spam_detection, "hasil_deteksi_penipuan")
 
             elif predict_spam == 2:
                 spam_detection = "SMS PROMO"
@@ -166,8 +165,7 @@ elif page == "Aplikasi Deteksi SMS":
                     """,
                     unsafe_allow_html=True
                 )
-                detection_results_promo = pd.concat([detection_results_promo, pd.DataFrame({'SMS': [clean_teks], 'Keterangan': [spam_detection]})], ignore_index=True)
-                save_detection_results(detection_results_promo, "hasil_deteksi_promo")
+                save_detection_results(clean_teks, spam_detection, "hasil_deteksi_promo")
 
 # Halaman Tabel Dataset
 elif page == "List Hasil Deteksi":
