@@ -11,9 +11,17 @@ uri = st.secrets["KEYMONG"]  # Ganti dengan URI MongoDB Atlas Anda
 client = MongoClient(uri)
 db = client["DatabaseSMS"]
 
-# Load saved model
-model_spam = pickle.load(open('Model/model_spam.sav', 'rb'))
-loaded_vec = TfidfVectorizer(decode_error="replace", vocabulary=set(pickle.load(open("Model/new_selected_feature_tf-idf.sav", "rb"))))
+# Load saved model and vectorizer
+@st.cache_resource
+def load_model_and_vectorizer():
+    model = pickle.load(open('Model/model_spam.sav', 'rb'))
+    vocab = pickle.load(open("Model/new_selected_feature_tf-idf.sav", "rb"))
+    vectorizer = TfidfVectorizer(decode_error="replace", vocabulary=set(vocab))
+    # Fit the vectorizer with dummy data to avoid NotFittedError
+    vectorizer.fit(["dummy data"])
+    return model, vectorizer
+
+model_spam, loaded_vec = load_model_and_vectorizer()
 
 # Function to load detection results from MongoDB
 def load_detection_results(collection_name):
@@ -26,12 +34,11 @@ def load_detection_results(collection_name):
 def save_detection_results(sms_text, prediction, collection_name):
     collection = db[collection_name]
     result = {'SMS': sms_text, 'Keterangan': prediction}
-    collection.insert_one(result)
-
-# Load detection results
-detection_results_promo = load_detection_results("hasil_deteksi_promo")
-detection_results_penipuan = load_detection_results("hasil_deteksi_penipuan")
-detection_results_normal = load_detection_results("hasil_deteksi_normal")
+    try:
+        collection.insert_one(result)
+        st.write(f"Data berhasil disimpan ke koleksi {collection_name}.")
+    except Exception as e:
+        st.write(f"Gagal menyimpan data ke MongoDB untuk koleksi {collection_name}:", e)
 
 # Sidebar dengan option menu
 with st.sidebar:
@@ -66,8 +73,7 @@ elif page == "Panduan Aplikasi":
 
 # Halaman Aplikasi Deteksi
 elif page == "Aplikasi Deteksi SMS":
-    st.title('Sistem Deteksi SMS Spamliiii')
-    spam_detection = ''
+    st.title('Sistem Deteksi SMS Spam')
 
     st.markdown(
         """
@@ -96,7 +102,8 @@ elif page == "Aplikasi Deteksi SMS":
                 unsafe_allow_html=True
             )
         else:
-            predict_spam = model_spam.predict(loaded_vec.fit_transform([clean_teks]))
+            transformed_text = loaded_vec.transform([clean_teks])
+            predict_spam = model_spam.predict(transformed_text)
 
             if predict_spam == 0:
                 spam_detection = "SMS NORMAL"
@@ -177,11 +184,11 @@ elif page == "List Hasil Deteksi":
     )
 
     if dataset_type == "Dataset Promo":
-        filtered_data = detection_results_promo
+        filtered_data = load_detection_results("hasil_deteksi_promo")
     elif dataset_type == "Dataset Penipuan":
-        filtered_data = detection_results_penipuan
+        filtered_data = load_detection_results("hasil_deteksi_penipuan")
     elif dataset_type == "Dataset Normal":
-        filtered_data = detection_results_normal
+        filtered_data = load_detection_results("hasil_deteksi_normal")
 
     filtered_data.reset_index(drop=True, inplace=True)
     filtered_data.index = filtered_data.index + 1
